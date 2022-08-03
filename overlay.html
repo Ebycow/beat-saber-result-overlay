@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:400,600,700,800" rel="stylesheet">
+    <style>
+        body {
+            font-family: "Montserrat", sans-serif;
+            text-align: left;
+            color: white;
+            background: black;
+
+            zoom: 100%;
+
+        }
+
+        @keyframes fadeIn {
+            0% {opacity: 0}
+            100% {opacity: 1}
+        }
+
+        .container {
+            margin : 40px;
+            flex-direction: row;
+            display: flex;
+            --fadeTime : 6000ms;
+            animation: fadeIn var(--fadeTime) ease;
+        }
+        .icon {
+            border-radius: 10px;
+            border: 2px white;
+        }
+        .title {
+            padding-left: 20px;
+
+            font-size: 38px;
+            font-weight: 700;
+        }
+        .sub-container {
+            margin-top: 6px;
+            margin-left: 20px;
+        }
+        .difficulty {
+            
+            padding: 4px 5px 4px 8px;
+
+            font-size: 24px;
+            color: black;
+            background: white;
+            border-radius: 4px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+
+        }
+        .subinfo {
+            font-size: 32px;
+            padding-left: 20px;
+        }
+        .star {
+            font-weight: 600;
+        }
+        .result-container {
+            padding-left: 20px;
+            margin-top: 5px;
+            font-size: 38px;
+            font-weight: 600;
+        }
+
+        .score {
+            padding-left: 20px;
+            margin-top: 10px;
+            font-size: 42px;
+            font-weight: 600;
+            letter-spacing: 2px;
+        }
+        
+        .perc {
+            opacity: 0.75;
+            font-size: 30px;
+            letter-spacing: 3px;
+        }
+        .pp {
+            letter-spacing: 3px;
+        }
+        .miss {
+            letter-spacing: 3px;
+        }
+        .playerCountryRank, .playerRank {
+            padding-right: 20px;
+            font-weight: 400;
+            font-size: 24px;
+            
+        }
+        .flag {
+            padding-bottom: 2px;
+        }
+        .metrics-title {
+            font-size: 36px;
+            letter-spacing: 3px;
+            font-weight: 400;
+            opacity: 0.75;
+
+            animation: fadeIn2 var(--fadeTime) ease;
+        }
+
+        @keyframes fadeIn2 {
+            0% {opacity: 0}
+            100% {opacity: 0.75}
+        }
+
+        .metrics-value {
+            font-size: 48px;
+            letter-spacing: 2px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            animation: fadeIn var(--fadeTime) ease;
+
+        }
+    </style>
+</head>
+<body>
+    <div id="app" >
+        <div v-if="show" id="topcontainer" class="container">
+            <div class="col">
+                <img style="width: 256px; height: 256px;"  class="icon" v-bind:src="img" alt="">
+            </div>
+            <div class="col">
+                <div class="sub-container">
+                    <span class="difficulty">{{ difficulty }}</span>
+                    <span class="subinfo"> <span class="star">★{{star.toFixed(2)}}</span>  </span>
+    
+                </div>
+                <div class="title">{{ title }}</div>
+                <div class="subinfo">{{ artist }} [{{ mapper }}]</div>
+                
+                <div class="score">{{ score.toLocaleString() }}</div>
+    
+                <div class="subinfo result-container">{{ rank }} <span class="perc">{{ perc }}</span>   <span class="pp">{{ pp.toFixed(2).toLocaleString() }}<span class="perc">PP</span></span>  <span class="miss">{{ missedNotes }}<span class="perc">MISS</span></span></div>
+    
+            </div>
+
+        </div>
+
+        <div v-if="show" id="bottomcontainer" style="margin: 40px;">
+            <div class="metrics-title" style="--fadeTime : 2000ms;">Average Point</div>
+            <div class="metrics-value" style="--fadeTime : 2000ms;">{{ average.toFixed(2) }}</div>
+
+            <div class="metrics-title" style="--fadeTime : 4000ms;">Before Cut</div>
+            <div class="metrics-value" style="--fadeTime : 4000ms;">{{ beforeCut.toFixed(2) }}</div> 
+
+            <div class="metrics-title" style="--fadeTime : 6000ms;">Accuracy</div>
+            <div class="metrics-value" style="--fadeTime : 6000ms;">{{ accuracy.toFixed(2) }}</div> 
+
+            <div class="metrics-title" style="--fadeTime : 8000ms;">After Cut</div>
+            <div class="metrics-value" style="--fadeTime : 8000ms;">{{ afterCut.toFixed(2) }}</div> 
+        </div>
+
+
+    </div>
+    
+    <script src="https://unpkg.com/vue@next"></script>
+    <script>        
+        const sum  = function(arr) {
+            var sum = 0;
+            arr.forEach(function(elm) {
+                sum += elm;
+            });
+            return sum;
+        };
+
+        const average = function(arr) {
+            return sum(arr)/arr.length;
+        };
+
+        const App = {
+            data() {
+                return {
+                    show : false,
+                    title : "",
+                    difficulty : "",
+                    pp : 0,
+                    artist : "",
+                    mapper : "",
+                    star : 0,
+                    score : 0,
+                    rank : "",
+                    perc : "",
+                    missedNotes : 0,
+                    img : "",
+                    
+                    average : 0,
+                    beforeCut : 0,
+                    accuracy : 0,
+                    afterCut : 0,
+
+                    noteCuts : [],
+
+                    maxScore : 0,
+
+
+                }
+            }, 
+            async created() {
+                // this.title = "Suzuya Homerarete Nobiru Type Nandesu.";
+                // this.artist = "saradisk";
+                // this.mapper = "Pug";
+                // this.difficulty = "Easy"
+                // this.star = "3.70";
+
+                // this.pp = 63.30;
+                // this.score = 161829;
+                // this.rank = "B";
+                // this.perc = "100%";
+                // this.missedNotes = 9999;
+                // this.perc = (performance.currentMaxScore > 0 ? (performance.score / performance.currentMaxScore * 100).toFixed(2) : "100.00") + "%"
+                
+                async function show (params) {
+                    await new Promise((resolve, reject) => {
+                        window.setTimeout(() => resolve(), 2000);
+                    })
+
+                    params.show = true;
+                    console.log("changed");
+
+                    window.setTimeout(() => {
+                        params.show = false;
+                    }, 10000);
+                    
+                }
+                
+                let socket;
+
+                const events = {
+                    hello(data){
+                        console.log("Connected");;
+                    },
+                    songStart(data, fullStatus, params) {
+                        console.log(fullStatus);
+                        params.title = fullStatus.status.beatmap.songName;
+                        params.artist = fullStatus.status.beatmap.songAuthorName;
+                        params.mapper = fullStatus.status.beatmap.levelAuthorName;
+                        params.difficulty = fullStatus.status.beatmap.difficulty;
+                        params.star = fullStatus.status.beatmap.star;
+                        params.img = "data:image/png;base64," + fullStatus.status.beatmap.songCover;
+
+                        params.noteCuts = [];
+
+                        params.maxScore = fullStatus.status.beatmap.maxScore;
+                        
+                        params.show = false;
+
+                    },
+                    async finished(data, fullStatus, params) {
+                        params.pp = fullStatus.status.performance.current_pp;
+                        params.score = fullStatus.status.performance.score;
+                        params.rank = fullStatus.status.performance.rank;
+                        params.perc = (fullStatus.status.performance.score / params.maxScore * 100).toFixed(2) + "%"
+                        params.missedNotes = fullStatus.status.performance.missedNotes;
+
+
+                        params.average = average(params.noteCuts.map(note => note.finalScore).filter(Boolean));
+                        params.beforeCut = average(params.noteCuts.map(note => note.initialScore - note.cutDistanceScore ? note.initialScore - note.cutDistanceScore : 0).filter(Boolean));
+                        params.afterCut = average(params.noteCuts.map(note => note.finalScore - note.initialScore).filter(Boolean));
+                        params.accuracy = average(params.noteCuts.map(note => note.cutDistanceScore).filter(Boolean));
+
+                        await show(params)
+
+                    },
+                    async failed(data, fullStatus, params) {
+                        params.pp = fullStatus.status.performance.current_pp;
+                        params.score = fullStatus.status.performance.score;
+
+                        let rank = "";
+                        const acc = (fullStatus.status.performance.score / params.maxScore * 100).toFixed(2)
+                        if(acc >= 90){
+                            rank = "SS"
+                        } else if(acc >= 80) {
+                            rank = "S";
+                        } else if(acc >= 65) {
+                            rank = "A";
+                        } else if(acc >= 50) {
+                            rank = "B";
+                        } else if(acc >= 35) {
+                            rank = "C";
+                        } else if(acc >= 20) {
+                            rank = "D";
+                        } else {
+                            rank = "E";
+                        }
+                        params.rank = rank;
+
+                        params.perc = (fullStatus.status.performance.score / params.maxScore * 100).toFixed(2) + "%"
+                        params.missedNotes = fullStatus.status.performance.missedNotes;
+
+
+                        params.average = average(params.noteCuts.map(note => note.finalScore).filter(Boolean));
+                        params.beforeCut = average(params.noteCuts.map(note => note.initialScore - note.cutDistanceScore >= 0 ? note.initialScore - note.cutDistanceScore : 0).filter(Boolean));
+                        params.afterCut = average(params.noteCuts.map(note => note.finalScore - note.initialScore).filter(Boolean));
+                        params.accuracy = average(params.noteCuts.map(note => note.cutDistanceScore).filter(Boolean));
+                        
+                        await show(params)
+
+                    },
+                    noteFullyCut(data, fullStatus, params) {
+                        // console.log(fullStatus);
+                        params.noteCuts[fullStatus.noteCut.noteID - 1].finalScore = fullStatus.noteCut.finalScore ? fullStatus.noteCut.finalScore : 0;
+                        params.noteCuts[fullStatus.noteCut.noteID - 1].cutDistanceScore = fullStatus.noteCut.cutDistanceScore ? fullStatus.noteCut.cutDistanceScore : 0;
+
+                    },
+                    noteCut(data, fullStatus, params) {
+                        // console.log(fullStatus);
+                        if(params.noteCuts[fullStatus.noteCut.noteID - 1] == undefined){
+                            params.noteCuts[fullStatus.noteCut.noteID - 1] = {};
+                        }
+                        params.noteCuts[fullStatus.noteCut.noteID - 1].initialScore = fullStatus.noteCut.initialScore ? fullStatus.noteCut.initialScore : 0;
+                    },
+                };
+
+                function connect(params){
+                    socket =  new WebSocket("ws://localhost:6557/socket");
+                    socket.onmessage = (message) => {
+                        const json = JSON.parse(message.data);
+                        if(["hello", "songStart", "finished", "failed", "noteFullyCut", "noteCut"].some(a => a=== json.event)) {
+                            events[json.event](json.status, json, params);
+                        }
+                    };
+
+                    socket.onclose = () => {
+                        setTimeout(connect, 5000);
+                    };
+                }
+
+                connect(this);
+
+                
+
+            }
+        }
+
+        Vue.createApp(App).mount('#app');
+        
+    </script>
+</body>
+</html>
