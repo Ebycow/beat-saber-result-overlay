@@ -129,7 +129,7 @@
             width: 100px;
             height: 100px;
             position: absolute;
-            background-color: rgba(0, 0, 0, 0.5);
+            background-color: rgba(0, 0, 0, 0.85);
             border-radius: 15px;
             border: solid 2px rgba(255, 255, 255, 0.75);
 
@@ -138,6 +138,14 @@
             
             animation: fadeIn var(--fadeTime) ease;
             
+        }
+
+        .dashed {
+            border: dashed 2px rgba(255, 255, 255, 0.5);
+        }
+
+        .dashed > span {
+            visibility: hidden;
         }
 
         .bloq span {
@@ -212,21 +220,21 @@
             <div class="metrics-value" style="--fadeTime : 8000ms;">{{ afterCut.toFixed(2) }}</div> 
         </div>
 
-        <div>
-            <div class="bloq Line0 Layer0" style="--fadeTime : 4000ms;"><span>{{ gridScore[0][0] }}</span></div>
-            <div class="bloq Line1 Layer0" style="--fadeTime : 5000ms;"><span>{{ gridScore[0][1] }}</span></div>
-            <div class="bloq Line2 Layer0" style="--fadeTime : 6000ms;"><span>{{ gridScore[0][2] }}</span></div>
-            <div class="bloq Line3 Layer0" style="--fadeTime : 7000ms;"><span>{{ gridScore[0][3] }}</span></div>
+        <div v-if="show">
+            <div class="bloq Line0 Layer0" v-bind:class=" gridScore[0][0] == -1 ? 'dashed' : '' " style="--fadeTime : 4000ms;"><span>{{ gridScore[0][0] }}</span></div>
+            <div class="bloq Line1 Layer0" v-bind:class=" gridScore[0][1] == -1 ? 'dashed' : '' " style="--fadeTime : 5000ms;"><span>{{ gridScore[0][1] }}</span></div>
+            <div class="bloq Line2 Layer0" v-bind:class=" gridScore[0][2] == -1 ? 'dashed' : '' " style="--fadeTime : 6000ms;"><span>{{ gridScore[0][2] }}</span></div>
+            <div class="bloq Line3 Layer0" v-bind:class=" gridScore[0][3] == -1 ? 'dashed' : '' " style="--fadeTime : 7000ms;"><span>{{ gridScore[0][3] }}</span></div>
     
-            <div class="bloq Line0 Layer1" style="--fadeTime : 3000ms;"><span>{{ gridScore[1][0] }}</span></div>
-            <div class="bloq Line1 Layer1" style="--fadeTime : 4000ms;"><span>{{ gridScore[1][1] }}</span></div>
-            <div class="bloq Line2 Layer1" style="--fadeTime : 5000ms;"><span>{{ gridScore[1][2] }}</span></div>
-            <div class="bloq Line3 Layer1" style="--fadeTime : 6000ms;"><span>{{ gridScore[1][3] }}</span></div>
+            <div class="bloq Line0 Layer1" v-bind:class=" gridScore[1][0] == -1 ? 'dashed' : '' " style="--fadeTime : 3000ms;"><span>{{ gridScore[1][0] }}</span></div>
+            <div class="bloq Line1 Layer1" v-bind:class=" gridScore[1][1] == -1 ? 'dashed' : '' " style="--fadeTime : 4000ms;"><span>{{ gridScore[1][1] }}</span></div>
+            <div class="bloq Line2 Layer1" v-bind:class=" gridScore[1][2] == -1 ? 'dashed' : '' " style="--fadeTime : 5000ms;"><span>{{ gridScore[1][2] }}</span></div>
+            <div class="bloq Line3 Layer1" v-bind:class=" gridScore[1][3] == -1 ? 'dashed' : '' " style="--fadeTime : 6000ms;"><span>{{ gridScore[1][3] }}</span></div>
     
-            <div class="bloq Line0 Layer2" style="--fadeTime : 2000ms;"><span>{{ gridScore[2][0] }}</span></div>
-            <div class="bloq Line1 Layer2" style="--fadeTime : 3000ms;"><span>{{ gridScore[2][1] }}</span></div>
-            <div class="bloq Line2 Layer2" style="--fadeTime : 4000ms;"><span>{{ gridScore[2][2] }}</span></div>
-            <div class="bloq Line3 Layer2" style="--fadeTime : 5000ms;"><span>{{ gridScore[2][3] }}</span></div>
+            <div class="bloq Line0 Layer2" v-bind:class=" gridScore[2][0] == -1 ? 'dashed' : '' " style="--fadeTime : 2000ms;"><span>{{ gridScore[2][0] }}</span></div>
+            <div class="bloq Line1 Layer2" v-bind:class=" gridScore[2][1] == -1 ? 'dashed' : '' " style="--fadeTime : 3000ms;"><span>{{ gridScore[2][1] }}</span></div>
+            <div class="bloq Line2 Layer2" v-bind:class=" gridScore[2][2] == -1 ? 'dashed' : '' " style="--fadeTime : 4000ms;"><span>{{ gridScore[2][2] }}</span></div>
+            <div class="bloq Line3 Layer2" v-bind:class=" gridScore[2][3] == -1 ? 'dashed' : '' " style="--fadeTime : 5000ms;"><span>{{ gridScore[2][3] }}</span></div>
     
         </div>
 
@@ -251,7 +259,7 @@
         const App = {
             data() {
                 return {
-                    show : true,
+                    show : false,
                     title : "",
                     difficulty : "",
                     pp : 0,
@@ -274,7 +282,7 @@
                     maxScore : 0,
 
                     gridScore: [
-                        [1,2,3,4],[5,6,7,8],[9,10,11,12]
+                        [0,0,0,0],[0,0,0,0],[0,0,0,0]
                     ]
 
 
@@ -296,7 +304,7 @@
                 
                 async function show (params) {
                     await new Promise((resolve, reject) => {
-                        window.setTimeout(() => resolve(), 2000);
+                        window.setTimeout(() => resolve(), 3000);
                     })
 
                     params.show = true;
@@ -304,7 +312,7 @@
 
                     window.setTimeout(() => {
                         params.show = false;
-                    }, 10000);
+                    }, 12000);
                     
                 }
                 
@@ -343,6 +351,19 @@
                         params.afterCut = average(params.noteCuts.map(note => note.finalScore - note.initialScore).filter(Boolean));
                         params.accuracy = average(params.noteCuts.map(note => note.cutDistanceScore).filter(Boolean));
 
+                        for (let layer = 0; layer <= 2; layer++) {
+                            for (let line = 0; line <= 3; line++) {
+                                if(params.noteCuts.filter(note => note.noteLine == line && note.noteLayer == layer).length){
+                                    const score = Math.floor(average(params.noteCuts.filter(note => note.noteLine == line && note.noteLayer == layer).map(note => note.finalScore)));
+                                    params.gridScore[layer][line]  = score >= 0 ? score : 0;
+                                } else {
+                                    params.gridScore[layer][line]  = -1;
+                                }
+
+                            }
+                            
+                        }
+
                         await show(params)
 
                     },
@@ -378,6 +399,19 @@
                         params.afterCut = average(params.noteCuts.map(note => note.finalScore - note.initialScore).filter(Boolean));
                         params.accuracy = average(params.noteCuts.map(note => note.cutDistanceScore).filter(Boolean));
                         
+                        for (let layer = 0; layer <= 2; layer++) {
+                            for (let line = 0; line <= 3; line++) {
+                                if(params.noteCuts.filter(note => note.noteLine == line && note.noteLayer == layer).length){
+                                    const score = Math.floor(average(params.noteCuts.filter(note => note.noteLine == line && note.noteLayer == layer).map(note => note.finalScore)));
+                                    params.gridScore[layer][line]  = score >= 0 ? score : 0;
+                                } else {
+                                    params.gridScore[layer][line]  = -1;
+                                }
+
+                            }
+                            
+                        }
+
                         await show(params)
 
                     },
@@ -385,6 +419,9 @@
                         // console.log(fullStatus);
                         params.noteCuts[fullStatus.noteCut.noteID - 1].finalScore = fullStatus.noteCut.finalScore ? fullStatus.noteCut.finalScore : 0;
                         params.noteCuts[fullStatus.noteCut.noteID - 1].cutDistanceScore = fullStatus.noteCut.cutDistanceScore ? fullStatus.noteCut.cutDistanceScore : 0;
+
+                        params.noteCuts[fullStatus.noteCut.noteID - 1].noteLine = fullStatus.noteCut.noteLine;
+                        params.noteCuts[fullStatus.noteCut.noteID - 1].noteLayer = fullStatus.noteCut.noteLayer;
 
                     },
                     noteCut(data, fullStatus, params) {
@@ -406,7 +443,7 @@
                     };
 
                     socket.onclose = () => {
-                        setTimeout(connect, 5000);
+                        setTimeout(() => connect(params), 5000);
                     };
                 }
 
